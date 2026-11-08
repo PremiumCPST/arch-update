@@ -32,6 +32,13 @@ fi
 # shellcheck source=src/lib/config.sh
 source "${libdir}/config.sh"
 
+# Keep system-only updates within the same full-upgrade workflow while skipping optional sources
+if [ "${option}" == "--system-only" ]; then
+	no_aur="true"
+	no_flatpak="true"
+	aur_helper=""
+fi
+
 # Source the "common" library which sets variables, functions and parameters commonly used across the various Arch-Update stages
 # shellcheck source=src/lib/common.sh
 source "${libdir}/common.sh"
@@ -126,6 +133,14 @@ case "${option}" in
 		# Source the "tray" library which starts the Arch-Update systray applet
 		# shellcheck source=src/lib/tray.sh
 		source "${libdir}/tray.sh"
+	;;
+	--system-only)
+		# Run the normal full-upgrade maintenance workflow without AUR or Flatpak updates
+		check_su_cmd
+		check_diff_prog
+
+		# shellcheck source=src/lib/full_upgrade.sh
+		source "${libdir}/full_upgrade.sh"
 	;;
 	-h|--help)
 		# Source the "help" library which displays the help message

@@ -2,8 +2,6 @@
 
 use anyhow::{Context, anyhow};
 use gettextrs::*;
-use gio::prelude::*;
-use gio_unix::DesktopAppInfo;
 use ksni::Handle;
 use ksni::menu::*;
 use log::{error, info, warn};
@@ -11,8 +9,7 @@ use notify::{Config, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::Deserialize;
 use std::env;
 use std::fs;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -20,17 +17,19 @@ use tokio::sync::mpsc;
 
 use crate::tray;
 
-// Helper to run Arch-Update from the desktop file (via `gio`)
-pub fn launch_arch_update(desktop_file: &Path) {
-    let Some(app) = DesktopAppInfo::from_filename(desktop_file) else {
-        error!("Failed to load Arch-Update desktop file");
-        return;
+// Open the GTK main window instead of starting an interactive terminal session.
+pub fn open_main_window() {
+    let window_executable = match env::current_exe() {
+        Ok(path) => path.with_file_name("arch-update-window"),
+        Err(error) => {
+            error!("Failed to locate the Arch-Update main window: {error}");
+            return;
+        }
     };
 
-    if let Err(error) = app.launch(&[], None::<&gio::AppLaunchContext>) {
-        error!("Failed to launch Arch-Update: {error}");
-    } else {
-        info!("Arch-Update launched");
+    match Command::new(&window_executable).spawn() {
+        Ok(_) => info!("Arch-Update main window opened"),
+        Err(error) => error!("Failed to open the Arch-Update main window: {error}"),
     }
 }
 

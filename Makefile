@@ -37,6 +37,9 @@ install:
 ifneq ($(WITH_TRAY),false)
 	# Install systray applet
 	install -Dm 755 "$(CARGO_TARGET_DIR)/release/${pkgname}-tray" "${DESTDIR}${PREFIX}/lib/${pkgname}/${pkgname}-tray"
+
+	# Install GTK main window
+	install -Dm 755 "$(CARGO_TARGET_DIR)/release/${pkgname}-window" "${DESTDIR}${PREFIX}/lib/${pkgname}/${pkgname}-window"
 endif
 
 	# Install icons

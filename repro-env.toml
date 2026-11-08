@@ -3,4 +3,4 @@ image = "docker.io/archlinux/archlinux"
 
 [packages]
 system = "archlinux"
-dependencies = ["cargo", "pkgconf"]
+dependencies = ["cargo", "pkgconf", "gtk4", "libadwaita"]

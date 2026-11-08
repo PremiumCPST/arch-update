@@ -20,7 +20,6 @@ use crate::updates_statefiles;
 pub struct ArchUpdateTray {
     icon_statefile: PathBuf,
     updates_statefile_type: updates_statefiles::UpdatesStateFiles,
-    desktop_file: PathBuf,
 }
 
 // Systray Applet implementation
@@ -82,9 +81,9 @@ impl ksni::Tray for ArchUpdateTray {
         }
     }
 
-    // Run Arch-Update via the desktop file when activated (left click)
+    // Open the GTK main window when activated (left click)
     fn activate(&mut self, _x: i32, _y: i32) {
-        tray_helpers::launch_arch_update(&self.desktop_file);
+        tray_helpers::open_main_window();
     }
 
     // Dynamically rebuild menu when opened (AboutToShow protocol)
@@ -120,7 +119,6 @@ impl ksni::Tray for ArchUpdateTray {
             }
 
             count => {
-                let desktop_file = self.desktop_file.clone();
                 let label = if count == 1 {
                     gettext("1 update available")
                 } else {
@@ -130,9 +128,7 @@ impl ksni::Tray for ArchUpdateTray {
                 menu.push(
                     StandardItem {
                         label,
-                        activate: Box::new(move |_| {
-                            tray_helpers::launch_arch_update(&desktop_file);
-                        }),
+                        activate: Box::new(|_| tray_helpers::open_main_window()),
                         ..Default::default()
                     }
                     .into(),
@@ -241,15 +237,24 @@ impl ksni::Tray for ArchUpdateTray {
             warn!("Failed to determine next Arch-Update check time");
         }
 
-        // Add a menu group containing a separator and the "Run Arch-Update", "Check for updates" & "Exit" buttons
-        let desktop_file = self.desktop_file.clone();
-
+        // Add a menu group containing a separator and the "Check for updates" & "Exit" buttons
         menu.extend([
             MenuItem::Separator,
             StandardItem {
-                label: gettext("Run Arch-Update"),
-                activate: Box::new(move |_| {
-                    tray_helpers::launch_arch_update(&desktop_file);
+                label: gettext("Open main window"),
+                activate: Box::new(|_| {
+                    let window_executable = match env::current_exe() {
+                        Ok(path) => path.with_file_name("arch-update-window"),
+                        Err(error) => {
+                            error!("Failed to locate the Arch-Update main window: {error}");
+                            return;
+                        }
+                    };
+
+                    match Command::new(&window_executable).spawn() {
+                        Ok(_) => info!("Arch-Update main window opened"),
+                        Err(error) => error!("Failed to open the Arch-Update main window: {error}"),
+                    }
                 }),
                 ..Default::default()
             }
@@ -283,7 +288,6 @@ impl ksni::Tray for ArchUpdateTray {
 pub async fn run(
     icon_statefile: PathBuf,
     updates_statefile_type: updates_statefiles::UpdatesStateFiles,
-    desktop_file: PathBuf,
 ) -> anyhow::Result<()> {
     // Clone icon statefile path variable (used by the watcher)
     let watcher_icon_statefile = icon_statefile.clone();
@@ -291,7 +295,6 @@ pub async fn run(
     let tray = ArchUpdateTray {
         icon_statefile,
         updates_statefile_type,
-        desktop_file,
     };
 
     // Start the systray applet

@@ -25,6 +25,7 @@ Arch-Update is designed to follow usual system maintenance steps, as [described 
 Features:
 
 - Automatic check and listing of available updates.
+- A GTK4 / Libadwaita main window showing pending updates by source.
 - Check for recent Arch Linux news (and offers to display them if there are).
 - Check for orphan packages (and offers to remove them if there are).
 - Check for old & uninstalled packages in cache (and offers to remove them if there are).
@@ -58,7 +59,7 @@ Alternative AUR package variants:
 Install required runtime dependencies:
 
 ```bash
-sudo pacman -S --needed bash systemd pacman pacman-contrib archlinux-contrib glibc libgcc curl fakeroot htmlq diffutils hicolor-icon-theme glib2 xdg-utils util-linux
+sudo pacman -S --needed bash systemd pacman pacman-contrib archlinux-contrib glibc libgcc curl fakeroot htmlq diffutils hicolor-icon-theme glib2 gtk4 libadwaita xdg-utils util-linux
 ```
 
 Additional optional dependencies you might want or need:
@@ -78,7 +79,7 @@ Additional optional dependencies you might want or need:
 Install required build and test dependencies:
 
 ```bash
-sudo pacman -S --asdeps make scdoc bats cargo pkgconf
+sudo pacman -S --asdeps make scdoc bats cargo pkgconf gtk4 libadwaita
 ```
 
 Download the archive of the [latest stable release](https://github.com/Antiz96/arch-update/releases/latest) and extract it (alternatively, you can clone this repository with `git`).
@@ -125,7 +126,7 @@ sleep 3 && arch-update --tray
 ```
 
 The systray icon dynamically changes to indicate the current state of your system ('up to date' or 'updates available'). When clicked, it launches `arch-update` in a terminal window via the [arch-update.desktop](https://github.com/Antiz96/arch-update/blob/main/res/desktop/arch-update.desktop) file.  
-The systray applet menu shows further information (like the list of pending updates, time of the last and next checks, ...) and allows to trigger specific actions (like running Arch-Update, check for updates, ...). See [screenshots](#screenshots) for more details.
+The systray applet menu shows further information (like the list of pending updates, time of the last and next checks, ...) and allows to trigger specific actions (like opening the GTK4 / Libadwaita main window or checking for updates). The main window lists pending package, AUR and Flatpak updates and refreshes while it is open. Click a package row to expand its details, such as its description, versions, repository and project page. The **Update system + AUR** button runs the complete interactive Arch-Update workflow in the main window, including Flatpak updates when enabled. **Update system packages only** runs a full official repository upgrade while skipping AUR and Flatpak. See [screenshots](#screenshots) for more details.
 
 **Notes:**
 
@@ -169,18 +170,7 @@ A "All" dropdown menu gathering the number and the list of pending updates for a
 
 ![aur](https://github.com/user-attachments/assets/cf9cd829-fc97-4a05-9a6a-f5cba1649e29)
 
-When the systray icon is left-clicked, `arch-update` is run in a terminal window (alternatively, you can click the "*X* update(s) available" entry or the dedicated "Run Arch-Update" one from the right-click menu):
-
-![run](https://github.com/user-attachments/assets/874e4f9e-4498-41bf-b257-1e5ecb782377)
-
-If at least one Arch Linux news has been published since the last run, `Arch-Update` will offer you to read the latest Arch Linux news directly from the terminal window.  
-The news published since the last run are tagged as `[NEW]`:
-
-![news](https://github.com/user-attachments/assets/42472294-ce87-4d86-87fc-3adb0f6f3e9e)
-
-If no news has been published since the last run, `Arch-Update` directly asks for your confirmation to proceed with update.
-
-From there, just let `Arch-Update` guide you through the various steps required for a complete and proper update of your system! :smile:
+Clicking the systray icon or selecting an available update opens the GTK main window. From there, you can review package details and start either a complete update (system, AUR and enabled Flatpak packages) or an update of official repository packages only. Progress and interactive prompts are displayed in the window.
 
 Certain options can be enabled, disabled or modified via the `arch-update.conf` configuration file. See the [arch-update.conf(5) man page](https://raw.githubusercontent.com/Antiz96/arch-update/refs/heads/main/doc/man/arch-update.conf.5.scd) for more details.
 
@@ -218,8 +208,7 @@ In case you want `Arch-Update` to check for new updates only once at boot, you c
 
 ### Run Arch-Update in a specific terminal emulator
 
-`gio` (used to launch the `arch-update` terminal application via the `arch-update.desktop` file when the systray applet is clicked) currently has a default limited list of known terminal emulators.  
-As such, if you don't have any of these "known" terminal emulators installed on your system, you might face an issue where clicking the systray applet does nothing (as `gio` couldn't find a terminal emulator from the said list). Incidentally, you might have multiple terminal emulators installed on your system and you may want to force Arch-Update to use a specific one. In both cases, you can specify which terminal emulator to use.
+When `arch-update` is launched directly from its desktop entry, `gio` uses a default limited list of known terminal emulators. If you do not have one of those installed, or want to choose a specific terminal emulator, you can configure one with `xdg-terminal-exec`.
 
 To do so, install the [xdg-terminal-exec package](https://archlinux.org/packages/?name=xdg-terminal-exec), create the `~/.config/xdg-terminals.list` file and add the name of the `.desktop` file of your terminal emulator of choice in it (e.g. `Alacritty.desktop`).  
 See <https://github.com/Vladimir-csp/xdg-terminal-exec?tab=readme-ov-file#configuration> for more details.

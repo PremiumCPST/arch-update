@@ -72,6 +72,10 @@ If no option is passed, launch the relevant series of functions to perform a com
 	Start the Arch-Update systray applet.
 	To additionally start it automatically at boot, run `--tray --enable`.
 
+*--system-only*
+	Run the normal full system upgrade and maintenance workflow, skipping AUR and Flatpak packages.
+
+
 *-V, --version*
 	Display version information.
 

@@ -23,6 +23,7 @@ $(eval_gettext "  --gen-config      Generate a default / example '\${name}.conf'
 $(eval_gettext "  --show-config     Display the '\${name}.conf' configuration file currently used (if it exists)")
 $(eval_gettext "  --edit-config     Edit the '\${name}.conf' configuration file currently used (if it exists)")
 $(eval_gettext "  --tray            Launch the \${_name} systray applet, you can optionally add the '--enable' argument to start it automatically at boot")
+$(eval_gettext "  --system-only     Run a full system update while skipping AUR and Flatpak packages")
 $(eval_gettext "  -h, --help        Display this help message and exit")
 $(eval_gettext "  -V, --version     Display version information and exit")
 
